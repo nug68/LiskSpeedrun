@@ -10,15 +10,11 @@ import "@nomicfoundation/hardhat-verify";
 import "hardhat-deploy";
 import "hardhat-deploy-ethers";
 
-// If not set, it uses ours Alchemy's default API key.
-// You can get your own at https://dashboard.alchemyapi.io
-
-const providerApiKey = process.env.ALCHEMY_API_KEY || "XfdusSNUiY5U0K7InJ1-seBOjcY-lBQi";
-// If not set, it uses the hardhat account 0 private key.
+// === ENV SETUP ===
+const providerApiKey = process.env.ALCHEMY_API_KEY; // || "ALCHEMY_API_KEY";
 const deployerPrivateKey =
-  process.env.DEPLOYER_PRIVATE_KEY ?? "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-// If not set, it uses ours Etherscan default API key.
-const etherscanApiKey = process.env.ETHERSCAN_API_KEY || "DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW";
+  process.env.DEPLOYER_PRIVATE_KEY ?? "84d7d2d0eacc612d9f828af52088e83548aa44c0aff4295d960d747d5547e683";
+const etherscanApiKey = process.env.ETHERSCAN_API_KEY; //|| "YOUR_BLOCKSCOUT_API_KEY";
 
 const config: HardhatUserConfig = {
   solidity: {
@@ -26,21 +22,20 @@ const config: HardhatUserConfig = {
     settings: {
       optimizer: {
         enabled: true,
-        // https://docs.soliditylang.org/en/latest/using-the-compiler.html#optimizer-options
         runs: 200,
       },
     },
   },
+
   defaultNetwork: "localhost",
+
   namedAccounts: {
     deployer: {
-      // By default, it will take the first Hardhat account as the deployer
       default: 0,
     },
   },
+
   networks: {
-    // View the networks that are pre-configured.
-    // If the network you are looking for is not here you can add new network settings
     hardhat: {
       forking: {
         url: `https://eth-mainnet.alchemyapi.io/v2/${providerApiKey}`,
@@ -127,10 +122,14 @@ const config: HardhatUserConfig = {
       url: "https://sepolia.rpc.zora.energy",
       accounts: [deployerPrivateKey],
     },
+
+    // === ✳️ LISK SEPOLIA CONFIG ===
     liskSepolia: {
       url: "https://rpc.sepolia-api.lisk.com",
+      chainId: 4202,
       accounts: [deployerPrivateKey],
     },
+
     mode: {
       url: "https://mainnet.mode.network",
       accounts: [deployerPrivateKey],
@@ -140,16 +139,30 @@ const config: HardhatUserConfig = {
       accounts: [deployerPrivateKey],
     },
   },
-  // configuration for harhdat-verify plugin
+
+  // === Verify Plugin Config ===
   etherscan: {
-    apiKey: `${etherscanApiKey}`,
+    apiKey: {
+      //liskSepolia: etherscanApiKey,
+    },
+    customChains: [
+      {
+        network: "liskSepolia",
+        chainId: 4202,
+        urls: {
+          apiURL: "https://sepolia-blockscout.lisk.com/api",
+          browserURL: "https://sepolia-blockscout.lisk.com",
+        },
+      },
+    ],
   },
-  // configuration for etherscan-verify from hardhat-deploy plugin
+
   verify: {
     etherscan: {
-      apiKey: `${etherscanApiKey}`,
+      apiKey: etherscanApiKey,
     },
   },
+
   sourcify: {
     enabled: false,
   },
